@@ -1,4 +1,7 @@
 # Laravel Mail Log
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bobwez98/mail-log-laravel/tests.yml?label=tests)](https://github.com/bobwez98/mail-log-laravel/actions/workflows/tests.yml)
+[![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/bobwez98/mail-log-laravel.svg)](https://packagist.org/packages/bobwez98/mail-log-laravel)
 
 Automatically log outgoing Laravel emails and their send status to your application's database.
 
