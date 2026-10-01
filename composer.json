@@ -1,0 +1,51 @@
+{
+    "name": "bobwez98/mail-log-laravel",
+    "description": "A module to log mails in laravel.",
+    "type": "package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bob Wezelman",
+            "email": "info@bobwezelman.nl"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.4",
+        "laravel/framework": "^13.0"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.9",
+        "laravel/pint": "^1.29",
+        "orchestra/testbench": "^11.0",
+        "phpstan/phpstan-mockery": "^2.0",
+        "phpunit/phpunit": "^13.0",
+        "rector/rector": "^2.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "BobWez98\\MailLog\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "BobWez98\\MailLog\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan --memory-limit=256M",
+        "style": "pint --test",
+        "quality": ["@style", "@analyse", "@test", "@coverage", "@rector"],
+        "coverage": "XDEBUG_MODE=coverage php -d memory_limit=2G vendor/bin/phpunit --coverage-text --only-summary-for-coverage-text | grep -c \"100.00%\" | grep -q \"^3$\" && exit 0 || exit 1",
+        "rector": "rector process --dry-run"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "BobWez98\\MailLog\\ServiceProvider"
+            ]
+        }
+    }
+}
