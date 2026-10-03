@@ -1,5 +1,5 @@
 # Laravel Mail Log
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bobwez98/mail-log-laravel/tests.yml?label=tests)](https://github.com/bobwez98/mail-log-laravel/actions/workflows/tests.yml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/BobWez98/mail-log-laravel/tests.yml?label=tests)](https://github.com/BobWez98/mail-log-laravel/actions/workflows/tests.yml)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/bobwez98/mail-log-laravel.svg)](https://packagist.org/packages/bobwez98/mail-log-laravel)
 
@@ -73,6 +73,15 @@ After Laravel dispatches the `MessageSent` event, the package uses the header to
 ## Usage
 
 No changes to your mailables are required. Once installed and migrated, outgoing emails are logged automatically.
+
+### Using a framework?
+
+Laravel mail log supports multiple frameworks to add a UI. For example:
+- [Statamic](https://github.com/BobWez98/mail-log-statamic)
+- Nova - Coming soon
+- Filament - Coming soon
+
+### Query the logs yourself
 
 Mail logs can be queried through the included Eloquent model:
 

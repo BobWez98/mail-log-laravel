@@ -39,10 +39,12 @@ final class UpdateMailLogTest extends TestCase
         ]));
 
         $mailLog->refresh();
+        $actualSentAt = $mailLog->sent_at;
 
         $this->assertSame(LogStatus::SUCCESS, $mailLog->status);
         $this->assertSame(['attempt' => 2], $mailLog->data);
-        $this->assertTrue($mailLog->sent_at->equalTo($sentAt));
+        $this->assertInstanceOf(Carbon::class, $actualSentAt);
+        $this->assertTrue($actualSentAt->equalTo($sentAt));
         $this->assertSame('sender@example.com', $mailLog->from);
         $this->assertSame('recipient@example.com', $mailLog->to);
         $this->assertSame('Quarterly report', $mailLog->subject);

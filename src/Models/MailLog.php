@@ -17,7 +17,7 @@ use Illuminate\Support\Carbon;
  * @property string $subject
  * @property string $body
  * @property array<string, mixed> $data
- * @property Carbon $sent_at
+ * @property Carbon|null $sent_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */

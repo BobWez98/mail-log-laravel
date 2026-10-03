@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace BobWez98\MailLog;
 
 use BobWez98\MailLog\Actions\CreateMailLog;
+use BobWez98\MailLog\Actions\PaginateMailLogs;
 use BobWez98\MailLog\Actions\UpdateMailLog;
 use BobWez98\MailLog\Listeners\MessageSendingListener;
 use BobWez98\MailLog\Listeners\MessageSentListener;
@@ -41,6 +42,7 @@ class ServiceProvider extends BaseServiceProvider
     protected function bootActions(): static
     {
         CreateMailLog::bind();
+        PaginateMailLogs::bind();
         UpdateMailLog::bind();
 
         return $this;
