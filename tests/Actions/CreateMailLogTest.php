@@ -43,6 +43,33 @@ final class CreateMailLogTest extends TestCase
     }
 
     #[Test]
+    public function it_persists_long_recipient_lists_and_subjects(): void
+    {
+        $to = str_repeat('recipient@example.com, ', 12);
+        $subject = str_repeat('Quarterly report ', 16);
+
+        $this->assertGreaterThan(255, strlen($to));
+        $this->assertGreaterThan(255, strlen($subject));
+
+        $data = CreateMailLogData::new([
+            'message_id' => (string) Str::uuid(),
+            'status' => LogStatus::PENDING,
+            'from' => 'sender@example.com',
+            'to' => $to,
+            'subject' => $subject,
+            'body' => '<p>Ready</p>',
+            'data' => ['attempt' => 1],
+        ]);
+
+        app(CreatesMailLog::class)->create($data);
+
+        $mailLog = MailLog::query()->sole();
+
+        $this->assertSame($to, $mailLog->to);
+        $this->assertSame($subject, $mailLog->subject);
+    }
+
+    #[Test]
     public function it_binds_the_contract_as_a_singleton(): void
     {
         $first = app(CreatesMailLog::class);

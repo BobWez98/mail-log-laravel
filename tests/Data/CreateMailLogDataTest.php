@@ -26,6 +26,19 @@ final class CreateMailLogDataTest extends TestCase
     }
 
     #[Test]
+    public function it_allows_empty_to_and_subject_values(): void
+    {
+        $attributes = self::validAttributes();
+        $attributes['to'] = '';
+        $attributes['subject'] = '';
+
+        $data = CreateMailLogData::new($attributes);
+
+        $this->assertSame('', $data->to);
+        $this->assertSame('', $data->subject);
+    }
+
+    #[Test]
     #[DataProvider('requiredFields')]
     public function it_requires_each_configured_field(string $field): void
     {

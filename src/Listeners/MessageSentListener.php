@@ -9,6 +9,7 @@ use BobWez98\MailLog\Data\UpdateMailLogData;
 use BobWez98\MailLog\Enums\LogStatus;
 use Illuminate\Mail\Events\MessageSent;
 use Symfony\Component\Mime\Email;
+use Throwable;
 
 class MessageSentListener
 {
@@ -18,25 +19,29 @@ class MessageSentListener
 
     public function handle(MessageSent $event): void
     {
-        /** @var Email $message */
-        $message = $event->sent->getOriginalMessage();
-        $header = $message
-            ->getHeaders()
-            ->get('X-Mail-Log-ID');
+        try {
+            /** @var Email $message */
+            $message = $event->sent->getOriginalMessage();
+            $header = $message
+                ->getHeaders()
+                ->get('X-Mail-Log-ID');
 
-        if (! $header) {
-            return;
+            if (! $header) {
+                return;
+            }
+
+            $uuid = $header->getBodyAsString();
+
+            $data = UpdateMailLogData::new([
+                'message_id' => $uuid,
+                'data' => $event->data,
+                'status' => LogStatus::SUCCESS,
+                'sent_at' => now(),
+            ]);
+
+            $this->updateMailLog->update($data);
+        } catch (Throwable $throwable) {
+            report($throwable);
         }
-
-        $uuid = $header->getBodyAsString();
-
-        $data = UpdateMailLogData::new([
-            'message_id' => $uuid,
-            'data' => $event->data,
-            'status' => LogStatus::SUCCESS,
-            'sent_at' => now(),
-        ]);
-
-        $this->updateMailLog->update($data);
     }
 }

@@ -10,11 +10,12 @@ use BobWez98\MailLog\Enums\LogStatus;
 use BobWez98\MailLog\Listeners\MessageSendingListener;
 use BobWez98\MailLog\Tests\TestCase;
 use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Ramsey\Uuid\UuidInterface;
+use RuntimeException;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Header\HeaderInterface;
 
@@ -83,7 +84,7 @@ final class MessageSendingListenerTest extends TestCase
     }
 
     #[Test]
-    public function it_propagates_validation_failures_without_creating_a_log(): void
+    public function it_swallows_validation_failures_without_creating_a_log(): void
     {
         $email = new Email()
             ->from('sender@example.com')
@@ -96,14 +97,38 @@ final class MessageSendingListenerTest extends TestCase
                 $mock->shouldNotReceive('create');
             });
 
-            try {
-                app(MessageSendingListener::class)->handle($event);
-                $this->fail('Validation was expected to fail.');
-            } catch (ValidationException $validationException) {
-                $this->assertArrayHasKey('body', $validationException->errors());
-            }
+            app(MessageSendingListener::class)->handle($event);
 
             $this->assertTrue($email->getHeaders()->has('X-Mail-Log-ID'));
         });
+    }
+
+    #[Test]
+    public function it_reports_creation_failures_without_throwing(): void
+    {
+        $exception = new RuntimeException('Unable to create mail log.');
+        $email = new Email()
+            ->from('sender@example.com')
+            ->to('recipient@example.com')
+            ->subject('Quarterly report')
+            ->text('Ready');
+        $event = new MessageSending($email, ['attempt' => 1]);
+
+        Exceptions::fake();
+
+        $this->mock(CreatesMailLog::class, function (MockInterface $mock) use ($exception): void {
+            $mock
+                ->shouldReceive('create')
+                ->once()
+                ->andThrow($exception);
+        });
+
+        app(MessageSendingListener::class)->handle($event);
+
+        Exceptions::assertReported(
+            fn (RuntimeException $reported): bool => $reported === $exception,
+        );
+        Exceptions::assertReportedCount(1);
+        $this->assertTrue($email->getHeaders()->has('X-Mail-Log-ID'));
     }
 }

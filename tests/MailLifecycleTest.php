@@ -8,9 +8,12 @@ use BobWez98\MailLog\Enums\LogStatus;
 use BobWez98\MailLog\Models\MailLog;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Mail\Message;
 use Illuminate\Mail\SentMessage as LaravelSentMessage;
+use Illuminate\Mail\Transport\ArrayTransport;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\Test;
 use Ramsey\Uuid\UuidInterface;
@@ -63,5 +66,56 @@ final class MailLifecycleTest extends TestCase
             $this->assertSame('Quarterly report', $mailLog->subject);
             $this->assertSame('<p>Ready</p>', $mailLog->body);
         });
+    }
+
+    #[Test]
+    public function it_delivers_and_logs_a_message_without_a_subject(): void
+    {
+        $mailer = Mail::build(['transport' => 'array']);
+        $transport = $mailer->getSymfonyTransport();
+
+        $this->assertInstanceOf(ArrayTransport::class, $transport);
+
+        $sentMessage = $mailer->raw('Ready', static function (Message $message): void {
+            $message
+                ->from('sender@example.com')
+                ->to('recipient@example.com');
+        });
+
+        $this->assertInstanceOf(LaravelSentMessage::class, $sentMessage);
+        $this->assertCount(1, $transport->messages());
+
+        $mailLog = MailLog::query()->sole();
+
+        $this->assertSame(LogStatus::SUCCESS, $mailLog->status);
+        $this->assertSame('recipient@example.com', $mailLog->to);
+        $this->assertSame('', $mailLog->subject);
+        $this->assertInstanceOf(Carbon::class, $mailLog->sent_at);
+    }
+
+    #[Test]
+    public function it_delivers_and_logs_a_message_with_only_a_bcc_recipient(): void
+    {
+        $mailer = Mail::build(['transport' => 'array']);
+        $transport = $mailer->getSymfonyTransport();
+
+        $this->assertInstanceOf(ArrayTransport::class, $transport);
+
+        $sentMessage = $mailer->raw('Ready', static function (Message $message): void {
+            $message
+                ->from('sender@example.com')
+                ->bcc('recipient@example.com')
+                ->subject('Quarterly report');
+        });
+
+        $this->assertInstanceOf(LaravelSentMessage::class, $sentMessage);
+        $this->assertCount(1, $transport->messages());
+
+        $mailLog = MailLog::query()->sole();
+
+        $this->assertSame(LogStatus::SUCCESS, $mailLog->status);
+        $this->assertSame('', $mailLog->to);
+        $this->assertSame('Quarterly report', $mailLog->subject);
+        $this->assertInstanceOf(Carbon::class, $mailLog->sent_at);
     }
 }
