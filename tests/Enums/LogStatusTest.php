@@ -13,7 +13,7 @@ final class LogStatusTest extends TestCase
     #[Test]
     public function it_exposes_the_supported_statuses(): void
     {
-        $this->assertSame(['success', 'pending', 'failed'], array_map(
+        $this->assertSame(['success', 'pending'], array_map(
             static fn (LogStatus $status): string => $status->value,
             LogStatus::cases(),
         ));

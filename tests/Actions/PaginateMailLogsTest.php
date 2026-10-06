@@ -44,7 +44,7 @@ final class PaginateMailLogsTest extends TestCase
         ]);
         $newest = MailLog::query()->create([
             'message_id' => (string) Str::uuid(),
-            'status' => LogStatus::FAILED,
+            'status' => LogStatus::PENDING,
             'from' => 'sender@example.com',
             'to' => 'newest@example.com',
             'subject' => 'Newest',
