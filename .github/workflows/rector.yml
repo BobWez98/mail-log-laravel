@@ -6,7 +6,12 @@ jobs:
     rector:
         runs-on: ubuntu-latest
 
-        name: Rector
+        strategy:
+            fail-fast: true
+            matrix:
+                php: [8.4, 8.5]
+
+        name: Rector - P${{ matrix.php }}
 
         steps:
             -   name: Checkout code
@@ -15,7 +20,7 @@ jobs:
             -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
                 with:
-                    php-version: 8.5
+                    php-version: ${{ matrix.php }}
                     extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
                     coverage: none
 
