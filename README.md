@@ -68,7 +68,7 @@ Before Laravel sends an email, the package:
 After Laravel dispatches the `MessageSent` event, the package uses the header to find the corresponding record, changes its status to `success`, and records when it was sent.
 
 > [!IMPORTANT]
-> Logged messages must contain a sender, recipient, subject, an HTML or plain-text body, and non-empty mail event data.
+> Logging failures are reported through Laravel's exception handler without interrupting mail delivery. Messages without a To recipient or subject are stored with empty values.
 
 ## Usage
 

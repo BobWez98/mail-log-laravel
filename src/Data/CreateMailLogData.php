@@ -23,8 +23,8 @@ class CreateMailLogData extends Data
         'message_id' => 'required',
         'status' => 'required',
         'from' => 'required',
-        'to' => 'required',
-        'subject' => 'required',
+        'to' => 'present|string',
+        'subject' => 'present|string',
         'body' => 'required',
         'data' => 'required',
     ];

@@ -12,9 +12,11 @@ use BobWez98\MailLog\Tests\TestCase;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Mail\SentMessage as LaravelSentMessage;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Str;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use RuntimeException;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\SentMessage as SymfonySentMessage;
 use Symfony\Component\Mime\Email;
@@ -71,6 +73,35 @@ final class MessageSentListenerTest extends TestCase
         app(MessageSentListener::class)->handle($event);
 
         $this->assertFalse($email->getHeaders()->has('X-Mail-Log-ID'));
+    }
+
+    #[Test]
+    public function it_reports_update_failures_without_throwing(): void
+    {
+        $exception = new RuntimeException('Unable to update mail log.');
+        $email = new Email()
+            ->from('sender@example.com')
+            ->to('recipient@example.com')
+            ->subject('Quarterly report')
+            ->html('<p>Ready</p>');
+        $email->getHeaders()->addTextHeader('X-Mail-Log-ID', (string) Str::uuid());
+        $event = self::messageSentEvent($email, ['attempt' => 2]);
+
+        Exceptions::fake();
+
+        $this->mock(UpdatesMailLog::class, function (MockInterface $mock) use ($exception): void {
+            $mock
+                ->shouldReceive('update')
+                ->once()
+                ->andThrow($exception);
+        });
+
+        app(MessageSentListener::class)->handle($event);
+
+        Exceptions::assertReported(
+            fn (RuntimeException $reported): bool => $reported === $exception,
+        );
+        Exceptions::assertReportedCount(1);
     }
 
     /** @param array<string, mixed> $data */

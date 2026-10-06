@@ -10,6 +10,7 @@ use BobWez98\MailLog\Enums\LogStatus;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Str;
 use Symfony\Component\Mime\Address;
+use Throwable;
 
 class MessageSendingListener
 {
@@ -19,28 +20,32 @@ class MessageSendingListener
 
     public function handle(MessageSending $event): void
     {
-        $uuid = (string) Str::uuid();
+        try {
+            $uuid = (string) Str::uuid();
 
-        $event->message
-            ->getHeaders()
-            ->addTextHeader('X-Mail-Log-ID', $uuid);
+            $event->message
+                ->getHeaders()
+                ->addTextHeader('X-Mail-Log-ID', $uuid);
 
-        $data = CreateMailLogData::new([
-            'message_id' => $uuid,
-            'status' => LogStatus::PENDING,
-            'from' => implode(', ', array_map(
-                static fn (Address $address): string => $address->toString(),
-                $event->message->getFrom(),
-            )),
-            'to' => implode(', ', array_map(
-                static fn (Address $address): string => $address->toString(),
-                $event->message->getTo(),
-            )),
-            'subject' => $event->message->getSubject(),
-            'body' => $event->message->getHtmlBody() ?? $event->message->getTextBody(),
-            'data' => $event->data,
-        ]);
+            $data = CreateMailLogData::new([
+                'message_id' => $uuid,
+                'status' => LogStatus::PENDING,
+                'from' => implode(', ', array_map(
+                    static fn (Address $address): string => $address->toString(),
+                    $event->message->getFrom(),
+                )),
+                'to' => implode(', ', array_map(
+                    static fn (Address $address): string => $address->toString(),
+                    $event->message->getTo(),
+                )),
+                'subject' => $event->message->getSubject() ?? '',
+                'body' => $event->message->getHtmlBody() ?? $event->message->getTextBody(),
+                'data' => $event->data,
+            ]);
 
-        $this->createMailLog->create($data);
+            $this->createMailLog->create($data);
+        } catch (Throwable $throwable) {
+            report($throwable);
+        }
     }
 }

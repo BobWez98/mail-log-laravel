@@ -38,4 +38,11 @@ final class ServiceProviderTest extends TestCase
         $this->assertContains(MessageSendingListener::class, $messageSendingListeners);
         $this->assertContains(MessageSentListener::class, $messageSentListeners);
     }
+
+    #[Test]
+    public function it_uses_text_columns_for_recipients_and_subjects(): void
+    {
+        $this->assertSame('text', Schema::getColumnType('mail_logs', 'to'));
+        $this->assertSame('text', Schema::getColumnType('mail_logs', 'subject'));
+    }
 }
