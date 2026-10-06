@@ -8,5 +8,4 @@ enum LogStatus: string
 {
     case SUCCESS = 'success';
     case PENDING = 'pending';
-    case FAILED = 'failed';
 }

@@ -68,7 +68,7 @@ Before Laravel sends an email, the package:
 After Laravel dispatches the `MessageSent` event, the package uses the header to find the corresponding record, changes its status to `success`, and records when it was sent.
 
 > [!IMPORTANT]
-> Logging failures are reported through Laravel's exception handler without interrupting mail delivery. Messages without a To recipient or subject are stored with empty values.
+> Exceptions raised while creating or updating mail logs are reported through Laravel's exception handler without interrupting mail delivery. Messages without a To recipient or subject are stored with empty values.
 
 ## Usage
 
@@ -114,7 +114,9 @@ Each mail log contains the following data:
 | `data` | Laravel mail event data |
 | `sent_at` | Date and time Laravel dispatched the sent event |
 
-The available statuses are `pending`, `success`, and `failed`. The package automatically uses `pending` and `success`; `failed` is available for custom integrations.
+The available statuses are `pending` and `success`.
+
+Laravel dispatches `MessageSending` and `MessageSent` events, but it does not provide a `MessageFailed` event. If the mail transport throws an exception, the package cannot observe that through Laravel's mail events and the record remains `pending`. Applications that need to track these failures must catch exceptions around their mail sends themselves.
 
 ## Quality
 
