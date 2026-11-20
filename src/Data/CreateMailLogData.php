@@ -26,7 +26,7 @@ class CreateMailLogData extends Data
         'to' => 'present|string',
         'subject' => 'present|string',
         'body' => 'required',
-        'data' => 'required',
+        'data' => 'present|array',
     ];
 
     /** @param array<string, mixed> $data */

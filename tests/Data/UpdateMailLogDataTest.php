@@ -41,17 +41,14 @@ final class UpdateMailLogDataTest extends TestCase
     }
 
     #[Test]
-    public function it_rejects_empty_event_data(): void
+    public function it_accepts_empty_event_data(): void
     {
         $attributes = self::validAttributes();
         $attributes['data'] = [];
 
-        try {
-            UpdateMailLogData::new($attributes);
-            $this->fail('Validation was expected to fail.');
-        } catch (ValidationException $validationException) {
-            $this->assertArrayHasKey('data', $validationException->errors());
-        }
+        $data = UpdateMailLogData::new($attributes);
+
+        $this->assertSame([], $data->data);
     }
 
     /** @return \Iterator<string, array<int, string>> */

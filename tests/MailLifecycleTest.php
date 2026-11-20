@@ -15,8 +15,10 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use JsonSerializable;
 use PHPUnit\Framework\Attributes\Test;
 use Ramsey\Uuid\UuidInterface;
+use RuntimeException;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\SentMessage as SymfonySentMessage;
 use Symfony\Component\Mime\Email;
@@ -117,5 +119,30 @@ final class MailLifecycleTest extends TestCase
         $this->assertSame('', $mailLog->to);
         $this->assertSame('Quarterly report', $mailLog->subject);
         $this->assertInstanceOf(Carbon::class, $mailLog->sent_at);
+    }
+
+    #[Test]
+    public function it_logs_messages_with_event_data_that_cannot_be_encoded(): void
+    {
+        $email = new Email()
+            ->from('sender@example.com')
+            ->to('recipient@example.com')
+            ->subject('Quarterly report')
+            ->html('<p>Ready</p>');
+
+        $unencodable = new class implements JsonSerializable
+        {
+            public function jsonSerialize(): never
+            {
+                throw new RuntimeException('Cannot be encoded.');
+            }
+        };
+
+        Event::dispatch(new MessageSending($email, ['attempt' => 1, 'submission' => $unencodable]));
+
+        $mailLog = MailLog::query()->sole();
+
+        $this->assertSame(LogStatus::PENDING, $mailLog->status);
+        $this->assertSame(['attempt' => 1], $mailLog->data);
     }
 }
