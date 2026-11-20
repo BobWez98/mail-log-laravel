@@ -20,7 +20,7 @@ class UpdateMailLogData extends Data
     protected array $rules = [
         'message_id' => 'required',
         'status' => 'required',
-        'data' => 'required',
+        'data' => 'present|array',
         'sent_at' => 'required',
     ];
 

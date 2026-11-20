@@ -48,6 +48,8 @@ The published configuration is available at `config/mail-log-laravel.php`:
 
 return [
     'enabled' => env('MAIL_LOG_ENABLED', true),
+
+    'store_data' => env('MAIL_LOG_STORE_DATA', true),
 ];
 ```
 
@@ -55,6 +57,12 @@ Mail logging is enabled by default. It can be disabled in your `.env` file:
 
 ```dotenv
 MAIL_LOG_ENABLED=false
+```
+
+Each log stores the mailable's view data. Only JSON-safe values are kept: scalars, `null` and arrays of those. Objects such as models are left out, because they may not be encodable or may recurse endlessly when serialized. To store no view data at all:
+
+```dotenv
+MAIL_LOG_STORE_DATA=false
 ```
 
 ## How It Works

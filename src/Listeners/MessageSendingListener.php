@@ -7,6 +7,7 @@ namespace BobWez98\MailLog\Listeners;
 use BobWez98\MailLog\Contracts\CreatesMailLog;
 use BobWez98\MailLog\Data\CreateMailLogData;
 use BobWez98\MailLog\Enums\LogStatus;
+use BobWez98\MailLog\Support\EventData;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Str;
 use Symfony\Component\Mime\Address;
@@ -40,7 +41,7 @@ class MessageSendingListener
                 )),
                 'subject' => $event->message->getSubject() ?? '',
                 'body' => $event->message->getHtmlBody() ?? $event->message->getTextBody(),
-                'data' => $event->data,
+                'data' => EventData::sanitize($event->data),
             ]);
 
             $this->createMailLog->create($data);

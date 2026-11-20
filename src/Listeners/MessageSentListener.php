@@ -7,6 +7,7 @@ namespace BobWez98\MailLog\Listeners;
 use BobWez98\MailLog\Contracts\UpdatesMailLog;
 use BobWez98\MailLog\Data\UpdateMailLogData;
 use BobWez98\MailLog\Enums\LogStatus;
+use BobWez98\MailLog\Support\EventData;
 use Illuminate\Mail\Events\MessageSent;
 use Symfony\Component\Mime\Email;
 use Throwable;
@@ -34,7 +35,7 @@ class MessageSentListener
 
             $data = UpdateMailLogData::new([
                 'message_id' => $uuid,
-                'data' => $event->data,
+                'data' => EventData::sanitize($event->data),
                 'status' => LogStatus::SUCCESS,
                 'sent_at' => now(),
             ]);
