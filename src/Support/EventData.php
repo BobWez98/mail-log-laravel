@@ -7,9 +7,6 @@ namespace BobWez98\MailLog\Support;
 class EventData
 {
     /**
-     * Keep only JSON-safe values. Mailable view data may contain objects that
-     * cannot be encoded or that recurse endlessly when they are serialized.
-     *
      * @param  array<array-key, mixed>  $data
      * @return array<array-key, mixed>
      */
